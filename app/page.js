@@ -16,10 +16,10 @@ export default function Home() {
   return (
     <main>
       {/* 1. Gate Intro / Overlay Screen */}
-      <CinematicOverlay onEnter={() => setIsMusicStarted(true)} />
+      {/* <CinematicOverlay onEnter={() => setIsMusicStarted(true)} /> */}
 
       {/* 2. Audio Controller Instance */}
-      <MusicPlayer isStarted={isMusicStarted} />
+      <MusicPlayer />
 
       {/* 3. Main Cinematic Content */}
       {/* Kita beri efek blur tipis/fade di konten utama jika user belum menekan enter (opsional, untuk menambah vibe) */}

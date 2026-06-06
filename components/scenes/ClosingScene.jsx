@@ -8,7 +8,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 const CREDITS = [
-  { role: 'A film by', name: 'Your Name Here' },
+  { role: 'A film by', name: 'Damar Raditya' },
   { role: 'Photography', name: 'Light & Moment Studio' },
   { role: 'Music', name: 'Silence Between Notes' },
   { role: 'Memory', name: 'Every Frame You\'ve Kept' },

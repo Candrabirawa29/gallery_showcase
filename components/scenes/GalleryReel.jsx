@@ -8,9 +8,9 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger'
 gsap.registerPlugin(ScrollTrigger)
 
 const FRAMES = [
-  { id: '001', src: '/images/gallery-01.jpg', title: 'Golden Hour', sub: 'The light that stays' },
-  { id: '002', src: '/images/gallery-02.jpg', title: 'Still Water', sub: 'Reflections of before' },
-  { id: '003', src: '/images/gallery-03.jpg', title: 'Last Train', sub: 'Departures at dusk' },
+  { id: '001', src: '/images/gallery-01.jpg', title: 'Where It All Started', sub: "Liat crush maen roblox, lgsg pen download bjir, satu satunya alasan download roblox waktu itu (●'◡'●)" },
+  { id: '002', src: '/images/gallery-02.jpg', title: 'Beneath The Northern Sky', sub: 'Akhirnya bisa mabar bareng bersama, seneng bangetttttttttttttttttttttttttttttttttttttttttttttttttttttttt☆*: .｡. o(≧▽≦)o .｡.:*☆!' },
+  { id: '003', src: '/images/gallery-03.jpg', title: 'Fear Was Never The Problem', sub: 'Boong jir, aku tetep takut main di map horor, tapi di rl aku ga takut ya!, kalo ketemu aku pukul (╯‵□′)╯︵┻━┻' },
   { id: '004', src: '/images/gallery-04.jpg', title: 'Open Field', sub: 'Where silence grows' },
   { id: '005', src: '/images/gallery-05.jpg', title: 'Fading Blue', sub: 'The hour between' },
 ]
@@ -216,7 +216,7 @@ export default function GalleryReel() {
                 >
                   {frame.title}
                 </h3>
-                <p className="card-sub text-xs font-sans tracking-widest text-[#f0ede8] opacity-50 uppercase">
+                <p className="card-sub text-xs font-sans tracking-widest text-[#f0ede8] opacity-50 ">
                   {frame.sub}
                 </p>
               </div>

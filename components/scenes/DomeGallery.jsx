@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useCallback } from 'react';
 import { useGesture } from '@use-gesture/react';
+import Image from 'next/image';
 
 const DEFAULT_IMAGES = [
   {
@@ -139,6 +140,8 @@ export default function DomeGallery({
   const startRotRef = useRef({ x: 0, y: 0 });
   const startPosRef = useRef(null);
   const draggingRef = useRef(false);
+  const autoRotateRAF = useRef(null);
+const isUserInteractingRef = useRef(false); // Penanda jika user lagi drag/klik
   const cancelTapRef = useRef(false);
   const movedRef = useRef(false);
   const inertiaRAF = useRef(null);
@@ -303,20 +306,32 @@ export default function DomeGallery({
   useGesture(
     {
       onDragStart: ({ event }) => {
-        if (focusedElRef.current) return;
-        stopInertia();
+  if (focusedElRef.current) return;
+  stopInertia();
 
-        pointerTypeRef.current = event.pointerType || 'mouse';
-        if (pointerTypeRef.current === 'touch') event.preventDefault();
-        if (pointerTypeRef.current === 'touch') lockScroll();
-        draggingRef.current = true;
-        cancelTapRef.current = false;
-        movedRef.current = false;
-        startRotRef.current = { ...rotationRef.current };
-        startPosRef.current = { x: event.clientX, y: event.clientY };
-        const potential = event.target.closest?.('.item__image');
-        tapTargetRef.current = potential || null;
-      },
+  // --- TAMBAHKAN INI ---
+  if (autoRotateRAF.current) {
+    cancelAnimationFrame(autoRotateRAF.current);
+    autoRotateRAF.current = null;
+  }
+
+  pointerTypeRef.current = event.pointerType || 'mouse';
+  if (pointerTypeRef.current === 'touch') event.preventDefault();
+  if (pointerTypeRef.current === 'touch') lockScroll();
+  draggingRef.current = true;
+  cancelTapRef.current = false;
+  movedRef.current = false;
+  startRotRef.current = { ...rotationRef.current };
+  startPosRef.current = { x: event.clientX, y: event.clientY };
+  
+  // --- UBAH BAGIAN INI ---
+  // Cari parent sphere-item terlebih dahulu
+  const sphereItem = event.target.closest?.('.sphere-item');
+  // Ambil elemen item__image yang ada di dalamnya sebagai target tap
+  const potential = sphereItem?.querySelector('.item__image');
+  
+  tapTargetRef.current = potential || null;
+},
       onDrag: ({ event, last, velocity: velArr = [0, 0], direction: dirArr = [0, 0], movement }) => {
         if (focusedElRef.current || !draggingRef.current || !startPosRef.current) return;
 
@@ -383,6 +398,22 @@ export default function DomeGallery({
           if (movedRef.current) lastDragEndAt.current = performance.now();
           movedRef.current = false;
           if (pointerTypeRef.current === 'touch') unlockScroll();
+          if (movedRef.current) lastDragEndAt.current = performance.now();
+movedRef.current = false;
+if (pointerTypeRef.current === 'touch') unlockScroll();
+if (Math.abs(velArr[0]) < 0.005 && Math.abs(velArr[1]) < 0.005) {
+  const rotateLoop = () => {
+    if (!draggingRef.current && !focusedElRef.current && !inertiaRAF.current && !openingRef.current) {
+      const nextY = wrapAngleSigned(rotationRef.current.y + 0.05); // Samakan speed-nya (0.05)
+      rotationRef.current.y = nextY;
+      applyTransform(rotationRef.current.x, nextY);
+    }
+    autoRotateRAF.current = requestAnimationFrame(rotateLoop);
+  };
+  if (!autoRotateRAF.current) {
+    autoRotateRAF.current = requestAnimationFrame(rotateLoop);
+  }
+}
         }
       }
     },
@@ -666,6 +697,37 @@ export default function DomeGallery({
     };
   }, []);
 
+  // Efek untuk menjalankan Auto-Rotate / Looping otomatis
+useEffect(() => {
+  const speed = 0.05; // Mengatur kecepatan putaran (makin besar makin ngebut)
+
+  const rotate = () => {
+    // Jalankan hanya jika user TIDAK sedang drag atau membuka gambar
+    if (!draggingRef.current && !focusedElRef.current && !inertiaRAF.current && !openingRef.current) {
+      
+      // Putar sumbu Y secara terus menerus (looping)
+      const nextY = wrapAngleSigned(rotationRef.current.y + speed);
+      rotationRef.current.y = nextY;
+      
+      // Terapkan transform ke elemen sphere 3D
+      applyTransform(rotationRef.current.x, nextY);
+    }
+    
+    // Lanjutkan frame animasi berikutnya
+    autoRotateRAF.current = requestAnimationFrame(rotate);
+  };
+
+  // Mulai animasi otomatis
+  autoRotateRAF.current = requestAnimationFrame(rotate);
+
+  // Cleanup jika komponen di-unmount
+  return () => {
+    if (autoRotateRAF.current) {
+      cancelAnimationFrame(autoRotateRAF.current);
+    }
+  };
+}, []);
+
   const cssStyles = `
     .sphere-root {
       --radius: 520px;
@@ -715,6 +777,8 @@ export default function DomeGallery({
       transform: rotateY(calc(var(--rot-y) * (var(--offset-x) + ((var(--item-size-x) - 1) / 2)) + var(--rot-y-delta, 0deg))) 
                  rotateX(calc(var(--rot-x) * (var(--offset-y) - ((var(--item-size-y) - 1) / 2)) + var(--rot-x-delta, 0deg))) 
                  translateZ(var(--radius));
+                 cursor: pointer;
+                 background: transparent;
     }
     
     .sphere-root[data-enlarging="true"] .scrim {
@@ -739,19 +803,30 @@ export default function DomeGallery({
     //   touch-action: none !important;
     //   overscroll-behavior: contain !important;
     // }
-    .item__image {
-      position: absolute;
-      inset: 10px;
-      border-radius: var(--tile-radius, 12px);
-      overflow: hidden;
-      cursor: pointer;
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-      transition: transform 300ms;
-      pointer-events: auto;
-      -webkit-transform: translateZ(0);
-      transform: translateZ(0);
-    }
+   .item__image {
+  position: absolute;
+  inset: 10px;
+  border-radius: var(--tile-radius, 12px);
+  overflow: hidden;
+  pointer-events: auto; /* Parent tetep bisa nerima hover */
+  
+  transform: scale(1) translateZ(0);
+  -webkit-transform: scale(1) translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  will-change: transform;
+  transition: transform 300ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.group:hover .item__image {
+  transform: scale(1.03) translateZ(0);
+  -webkit-transform: scale(1.03) translateZ(0);
+}
+
+/* Tambahkan ini: Semua elemen di dalam item__image tidak akan mengganggu kursor */
+.item__image * {
+  pointer-events: none;
+}
     .item__image--reference {
       position: absolute;
       inset: 10px;
@@ -787,7 +862,7 @@ export default function DomeGallery({
               {items.map((it, i) => (
                 <div
                   key={`${it.x},${it.y},${i}`}
-                  className="sphere-item absolute m-auto"
+                  className="sphere-item group absolute m-auto"
                   data-src={it.src}
                   data-alt={it.alt}
                   data-offset-x={it.x}
@@ -805,8 +880,7 @@ export default function DomeGallery({
                     right: '-999px'
                   }}
                 >
-                  <div
-                    className="item__image absolute block overflow-hidden cursor-pointer  transition-transform duration-300"
+                 <div className="item__image absolute inset-0 block overflow-hidden cursor-pointer"
                     role="button"
                     tabIndex={0}
                     aria-label={it.alt || 'Open image'}
@@ -831,8 +905,10 @@ export default function DomeGallery({
                       backfaceVisibility: 'hidden'
                     }}
                   >
-                    <img
+                    <Image
                       src={it.src}
+                      width={400}
+                      height={400}
                       draggable={false}
                       alt={it.alt}
                       className="w-full h-full object-cover pointer-events-none"
