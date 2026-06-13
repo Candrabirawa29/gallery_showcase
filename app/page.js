@@ -9,6 +9,7 @@ import MusicPlayer from "@/components/MusicPlayer";
 import DomeGallery from "@/components/scenes/DomeGallery";
 import MemoryWall from "@/components/scenes/MemoryWall";
 import ClosingScene from "@/components/scenes/ClosingScene";
+import ApologySection from "@/components/scenes/ApologySection";
 
 export default function Home() {
   const [isMusicStarted, setIsMusicStarted] = useState(false);
@@ -37,6 +38,7 @@ export default function Home() {
           grayscale
         />
         <MemoryWall />
+        <ApologySection />
         <ClosingScene/>
       </div>
     </main>
