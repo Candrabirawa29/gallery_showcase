@@ -43,6 +43,7 @@ export default function ClosingScene() {
       })
 
       // ── FADE IN dari hitam saat section masuk ──
+      // Durasi diperlama sedikit agar seksi sebelumnya bersih tertutup hitam terlebih dahulu
       gsap.fromTo(overlayRef.current,
         { opacity: 1 },
         {
@@ -50,16 +51,22 @@ export default function ClosingScene() {
           ease: 'power2.out',
           scrollTrigger: {
             trigger: section,
-            start: '0% top',
-            end: '10% top',
+            start: 'top top',
+            end: '15% top', // Dibuat sedikit lebih panjang agar transisi halus
             scrub: 1,
           },
         }
       )
 
-      // ── CLOSING TITLE: setiap kata muncul bergantian ──
+      // ── CLOSING TITLE: batas start digeser mundur agar tidak menabrak ──
       charsRef.current.forEach((el, i) => {
         if (!el) return
+        
+        // Perubahan Utama: Nilai start digeser dari 8% menjadi dimulai dari 22% 
+        // Ini memberikan ruang kosong (buffer ruang hitam) agar teks seksi sebelumnya hilang total
+        const startPercent = 22 + i * 6
+        const endPercent = startPercent + 10
+
         gsap.fromTo(el,
           { opacity: 0, y: 40, filter: 'blur(6px)' },
           {
@@ -69,15 +76,15 @@ export default function ClosingScene() {
             ease: 'power3.out',
             scrollTrigger: {
               trigger: section,
-              start: `${8 + i * 7}% top`,
-              end: `${18 + i * 7}% top`,
+              start: `${startPercent}% top`,
+              end: `${endPercent}% top`,
               scrub: 0.8,
             },
           }
         )
       })
 
-      // ── DIVIDER LINE ──
+      // ── DIVIDER LINE (Disesuaikan mengikuti timeline baru) ──
       gsap.fromTo(dividerRef.current,
         { scaleX: 0, opacity: 0 },
         {
@@ -86,8 +93,8 @@ export default function ClosingScene() {
           ease: 'power2.inOut',
           scrollTrigger: {
             trigger: section,
-            start: '42% top',
-            end: '54% top',
+            start: '54% top',
+            end: '64% top',
             scrub: 1,
           },
         }
@@ -102,14 +109,14 @@ export default function ClosingScene() {
           ease: 'power2.out',
           scrollTrigger: {
             trigger: section,
-            start: '46% top',
-            end: '56% top',
+            start: '58% top',
+            end: '68% top',
             scrub: 0.8,
           },
         }
       )
 
-      // ── CREDITS: muncul satu per satu ──
+      // ── CREDITS: muncul berurutan secara anggun ──
       creditsRef.current.forEach((el, i) => {
         if (!el) return
         gsap.fromTo(el,
@@ -120,12 +127,25 @@ export default function ClosingScene() {
             ease: 'power2.out',
             scrollTrigger: {
               trigger: section,
-              start: `${55 + i * 8}% top`,
-              end: `${63 + i * 8}% top`,
+              start: `${68 + i * 6}% top`,
+              end: `${74 + i * 6}% top`,
               scrub: 0.7,
             },
           }
         )
+      })
+
+      // ── Semua konten fade out sebelum layar hitam total ──
+      gsap.to(titleWrapRef.current, {
+        opacity: 0,
+        y: -30,
+        ease: 'power2.in',
+        scrollTrigger: {
+          trigger: section,
+          start: '88% top',
+          end: '94% top',
+          scrub: 0.8,
+        },
       })
 
       // ── FADE TO BLACK di akhir ──
@@ -136,25 +156,12 @@ export default function ClosingScene() {
           ease: 'power2.inOut',
           scrollTrigger: {
             trigger: section,
-            start: '88% top',
+            start: '92% top',
             end: '100% top',
             scrub: 1,
           },
         }
       )
-
-      // ── Semua konten fade out sebelum black ──
-      gsap.to(titleWrapRef.current, {
-        opacity: 0,
-        y: -30,
-        ease: 'power2.in',
-        scrollTrigger: {
-          trigger: section,
-          start: '80% top',
-          end: '90% top',
-          scrub: 0.8,
-        },
-      })
 
     }, section)
 
@@ -200,7 +207,7 @@ export default function ClosingScene() {
         {/* Section label */}
         <div className="absolute top-8 left-8 z-30">
           <p className="text-[10px] font-mono tracking-[0.3em] text-[#f0ede8] opacity-30 uppercase">
-            004 / Closing
+            007 / Closing
           </p>
         </div>
 
@@ -253,7 +260,8 @@ export default function ClosingScene() {
                 className="flex flex-col items-center gap-1"
                 style={{ opacity: 0 }}
               >
-                <p className="text-[10px] font-mono tracking-[0.~3em] text-[#f0ede8] opacity-40 uppercase">
+                {/* Memperbaiki typo syntax tracking class Tailwind yang rusak sebelumnya */}
+                <p className="text-[10px] font-mono tracking-[0.3em] text-[#f0ede8] opacity-40 uppercase">
                   {credit.role}
                 </p>
                 <p

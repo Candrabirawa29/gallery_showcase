@@ -10,6 +10,7 @@ import DomeGallery from "@/components/scenes/DomeGallery";
 import MemoryWall from "@/components/scenes/MemoryWall";
 import ClosingScene from "@/components/scenes/ClosingScene";
 import ApologySection from "@/components/scenes/ApologySection";
+import ThingsILovedSection from "@/components/scenes/ThingsILovedSection";
 
 export default function Home() {
   const [isMusicStarted, setIsMusicStarted] = useState(false);
@@ -28,7 +29,7 @@ export default function Home() {
       <HeroScene />
       <StoryIntro />
       <GalleryReel />
-      <div className="w-full h-screen relative block bg-black">
+      <div className="w-full min-h-screen relative block bg-black">
         <DomeGallery
           fit={0.8}
           minRadius={600}
@@ -39,6 +40,7 @@ export default function Home() {
         />
         <MemoryWall />
         <ApologySection />
+        <ThingsILovedSection />
         <ClosingScene/>
       </div>
     </main>
